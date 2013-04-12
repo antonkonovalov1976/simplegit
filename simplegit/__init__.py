@@ -61,7 +61,7 @@ class Git(object):
     def get_diff_rows(self, filename):
         """ search a newest/changed rows for <filename>
         """
-        src = self._call_git("diff", "-U0", filename).split("\n")[4:]
+        src = self._call_git("diff", "-U0", "--cached", filename).split("\n")[4:]
         rr = re.compile(r"^@@[^+]*\+(\d+)")
         res = []
         curr_pos = 0
