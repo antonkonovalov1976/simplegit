@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+__author__ = "A.A.Konovalov"
+__version__ = "0.2"
+
  
 import sys
 import os
 import re
 import subprocess
 
+
 class Git(object):
-    """ class for a GIT
+    """ class for a GIT interface
     """
         
     def _call_git(self, *params):
@@ -34,14 +39,14 @@ class Git(object):
         """ set one param
         """
         if filename:
-            filename = "-f " + filename
-        self.config(param, value)
+            self.config("-f", filename, param, value)
+        else:
+            self.config(param, value)
 
     def del_param(self, param):
         """ remove parameter
         """
         self.config("--unset", param)
-
 
     def check_git(self):
         """ check: git is installed?

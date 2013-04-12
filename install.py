@@ -5,6 +5,9 @@
     install util for git hook pre-commit
 """
 
+__author__ = "A.A.Konovalov"
+__version__ = "0.2"
+
 
 import sys
 import os
