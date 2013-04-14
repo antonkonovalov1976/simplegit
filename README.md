@@ -8,14 +8,14 @@ simplegit
 ==========
 
 install simplegit module:
-_> python setup.py install_
+ _> python setup.py install_
 
 install pre-commit hook:
-_> [sudo] python install.py <path-to-project> [max-line-length]_
+ _> [sudo] python install.py <path-to-project> [max-line-length]_
 
 
 2. SETUP
 ========
 
-to change options, please use *git config*:
-_> git config pre-commit.max-line-length.enabled false_
+To change options, please use *git config*:
+ _> git config pre-commit.max-line-length.enabled false_

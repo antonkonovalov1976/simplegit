@@ -9,7 +9,7 @@ import unittest
 sys.path.insert(0, os.path.abspath(__file__ + "/../.."))
 
 
-from simplegit import Git
+from simplegit import Git, GitException
 
 
 class TestGitSimple(unittest.TestCase):
@@ -27,6 +27,9 @@ class TestGitSimple(unittest.TestCase):
         ret = self.git.get_param("foo.bar", 100)
         self.assertEqual(100, ret)
         
+    def test3(self):
+        self.assertRaises(GitException, lambda: self.git.set_param("foobar", "1234"))
+
 
 if __name__ == "__main__":
     if Git().check_git():

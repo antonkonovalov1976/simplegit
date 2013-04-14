@@ -11,6 +11,9 @@ import re
 import subprocess
 
 
+class GitException(Exception): pass 
+
+
 class Git(object):
     """ class for a GIT interface
     """
@@ -18,7 +21,17 @@ class Git(object):
     def _call_git(self, *params):
         """ call a git command with params
         """
-        p = subprocess.Popen(["git"]+list(params), stdout=subprocess.PIPE)
+        p = subprocess.Popen(
+            ["git"]+list(params),
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=False
+            )
+        exit_code = p.wait()
+        if exit_code != 0:
+            raise GitException("Error: git exit code = %s" % exit_code)
+
         return p.stdout.read().strip()
 
     def config(self, *options):
@@ -29,10 +42,10 @@ class Git(object):
     def get_param(self, param, default=None):
         """ get one param from git config
         """
-        res = self.config("--get", param)
-        if res:
+        try:
+            res = self.config("--get", param)
             return res
-        else:
+        except GitException:
             return default    
 
     def set_param(self, param, value, filename=""):
