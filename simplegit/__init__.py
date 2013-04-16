@@ -17,7 +17,6 @@ class GitException(Exception): pass
 class Git(object):
     """ class for a GIT interface
     """
-        
     def _call_git(self, *params):
         """ call a git command with params
         """
@@ -64,22 +63,35 @@ class Git(object):
     def check_git(self):
         """ check: git is installed?
         """
-        res = self.get_param("foofoo.strwgweefwtf", "error: invalid key:").lower()
-        return res.startswith("error: invalid key:")
+        try:
+            self._call_git("--version")
+            return True
+        except OSError:      
+            return False
 
     def get_files(self):
-        """ return a file list
+        """ return a file list... or empty list
         """
-        return self._call_git('diff',
+        ret = self._call_git(
+             'diff',
              '--cached',
              '--diff-filter=AM',
              '-U0',
-             '--name-only').split("\n")
-
+             '--name-only')
+        if ret:
+            return ret.split('\n')
+        else:
+            return [] 
+                
     def get_diff_rows(self, filename):
         """ search a newest/changed rows for <filename>
         """
-        src = self._call_git("diff", "-U0", "--cached", filename).split("\n")[4:]
+        src = self._call_git(
+            'diff', 
+            '-U0', 
+            '--cached', 
+            filename).split('\n')[4:]
+
         rr = re.compile(r"^@@[^+]*\+(\d+)")
         res = []
         curr_pos = 0
