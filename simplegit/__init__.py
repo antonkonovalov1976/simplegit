@@ -4,14 +4,15 @@
 __author__ = "A.A.Konovalov"
 __version__ = "0.2"
 
- 
+
 import sys
 import os
 import re
 import subprocess
 
 
-class GitException(Exception): pass 
+class GitException(Exception):
+    pass
 
 
 class Git(object):
@@ -25,8 +26,7 @@ class Git(object):
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            shell=False
-            )
+            shell=False)
         exit_code = p.wait()
         if exit_code != 0:
             raise GitException("Error: git exit code = %s" % exit_code)
@@ -45,7 +45,7 @@ class Git(object):
             res = self.config("--get", param)
             return res
         except GitException:
-            return default    
+            return default
 
     def set_param(self, param, value, filename=""):
         """ set one param
@@ -66,30 +66,30 @@ class Git(object):
         try:
             self._call_git("--version")
             return True
-        except OSError:      
+        except OSError:
             return False
 
     def get_files(self):
         """ return a file list... or empty list
         """
         ret = self._call_git(
-             'diff',
-             '--cached',
-             '--diff-filter=AM',
-             '-U0',
-             '--name-only')
+            'diff',
+            '--cached',
+            '--diff-filter=AM',
+            '-U0',
+            '--name-only')
         if ret:
             return ret.split('\n')
         else:
-            return [] 
-                
+            return []
+
     def get_diff_rows(self, filename):
         """ search a newest/changed rows for <filename>
         """
         src = self._call_git(
-            'diff', 
-            '-U0', 
-            '--cached', 
+            'diff',
+            '-U0',
+            '--cached',
             filename).split('\n')[4:]
 
         rr = re.compile(r"^@@[^+]*\+(\d+)")
@@ -100,7 +100,6 @@ class Git(object):
                 curr_pos = int(rr.findall(s)[0])
             if s.startswith('+'):
                 res.append((curr_pos, s[1:]))
-                curr_pos += 1   
+                curr_pos += 1
 
         return res
-
