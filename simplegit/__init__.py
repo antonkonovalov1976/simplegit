@@ -1,14 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 __author__ = "A.A.Konovalov"
-__version__ = "0.2"
+__version__ = "0.3"
 
 
-import sys
-import os
 import re
 import subprocess
+
+
+__all__ = ('Git', 'GitException')
 
 
 class GitException(Exception):
@@ -16,13 +14,23 @@ class GitException(Exception):
 
 
 class Git(object):
-    """ class for a GIT interface
-    """
-    def _call_git(self, *params):
+
+    """Wrapper class for a GIT interface."""
+
+    reg_range = re.compile(r"^@@[^+]*\+(\d+)")
+
+    def __init__(self):
+        try:
+            self._version_str = self._call_git("--version")
+        except OSError:
+            raise GitException('git is currently not installed')
+
+    @staticmethod
+    def _call_git(*params):
         """ call a git command with params
         """
         p = subprocess.Popen(
-            ["git"]+list(params),
+            ["git"] + list(params),
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -33,43 +41,39 @@ class Git(object):
 
         return p.stdout.read().strip()
 
-    def config(self, *options):
+    @staticmethod
+    def config(*options):
         """ run: git config <options>
         """
-        return self._call_git("config", *options)
+        return Git._call_git("config", *options)
 
-    def get_param(self, param, default=None):
+    @staticmethod
+    def get_param(param, default=None):
         """ get one param from git config
         """
         try:
-            res = self.config("--get", param)
+            res = Git.config("--get", param)
             return res
         except GitException:
             return default
 
-    def set_param(self, param, value, filename=""):
-        """ set one param
+    @staticmethod
+    def set_param(param, value, filename=""):
+        """ set one parameter
         """
         if filename:
-            self.config("-f", filename, param, value)
+            Git.config("-f", filename, param, value)
         else:
-            self.config(param, value)
+            Git.config(param, value)
 
-    def del_param(self, param):
+    @staticmethod
+    def del_param(param):
         """ remove parameter
         """
-        self.config("--unset", param)
+        Git.config("--unset", param)
 
-    def check_git(self):
-        """ check: git is installed?
-        """
-        try:
-            self._call_git("--version")
-            return True
-        except OSError:
-            return False
-
-    def get_files(self):
+    @property
+    def files(self):
         """ return a file list... or empty list
         """
         ret = self._call_git(
@@ -86,20 +90,25 @@ class Git(object):
     def get_diff_rows(self, filename):
         """ search a newest/changed rows for <filename>
         """
-        src = self._call_git(
+        src = Git._call_git(
             'diff',
             '-U0',
             '--cached',
             filename).split('\n')[4:]
 
-        rr = re.compile(r"^@@[^+]*\+(\d+)")
-        res = []
+        result = []
         curr_pos = 0
         for s in src:
             if s.startswith('@@'):
-                curr_pos = int(rr.findall(s)[0])
+                curr_pos = int(self.reg_range.findall(s)[0])
             if s.startswith('+'):
-                res.append((curr_pos, s[1:]))
+                result.append((curr_pos, s[1:]))
                 curr_pos += 1
 
-        return res
+        return result
+
+    @property
+    def version_str(self):
+        """Git version."""
+        return self._version_str
+
